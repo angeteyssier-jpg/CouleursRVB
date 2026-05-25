@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sélecteur de Couleur Pro (RVB, CMJN, TSL)</title>
+    <title>Sélecteur de Couleur Pro (Corrigé)</title>
     <style>
         :root {
             --bg-color: #f0f0f0;
@@ -42,7 +42,6 @@
 
         header h1 { margin: 0; font-size: 1.5rem; font-weight: bold; }
 
-        /* Grille des 3 sections */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -53,17 +52,16 @@
             .grid-container { grid-template-columns: 1fr; }
         }
 
-        /* Cartes */
         .section {
             background: var(--bg-color);
             border: 2px solid var(--accent-color);
             border-radius: 8px;
-            padding: 15px; /* Un peu moins de padding pour mobile */
+            padding: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden; /* Pour contenir le bandeau */
+            overflow: hidden;
         }
 
         .section-header {
@@ -81,7 +79,6 @@
             color: var(--accent-color);
         }
 
-        /* LE BANDEAU DE COULEUR */
         .color-strip {
             height: 12px;
             width: 100%;
@@ -93,7 +90,6 @@
             transition: background-color 0.1s;
         }
 
-        /* Contrôles */
         .control-row {
             display: flex;
             align-items: center;
@@ -102,7 +98,7 @@
         }
 
         .label-text {
-            width: 60px; /* Un peu plus compact pour mobile */
+            width: 60px;
             font-size: 0.9rem;
             font-weight: 600;
             color: var(--accent-color);
@@ -117,7 +113,6 @@
             margin-left: 8px;
         }
 
-        /* Sliders */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -147,7 +142,6 @@
             border: 1px solid #999;
         }
 
-        /* Boutons +/- */
         .btn-group {
             display: flex;
             justify-content: center;
@@ -178,7 +172,6 @@
         .btn-plus-small { background-color: #2ecc71; }
         .btn-plus { background-color: #27ae60; }
 
-        /* Zone centrale d'aperçu */
         .preview-area {
             grid-column: 1 / -1;
             background: white;
@@ -230,7 +223,6 @@
             text-transform: uppercase;
         }
 
-        /* Bouton Pipette */
         .pipette-container {
             grid-column: 1 / -1;
             text-align: center;
@@ -277,7 +269,6 @@
             <div class="section-header">
                 <div class="section-title">Mode RVB</div>
             </div>
-            <!-- Bandeau de couleur -->
             <div id="strip-rgb" class="color-strip" style="background-color: #C86432;"></div>
             
             <div class="control-wrapper">
@@ -328,7 +319,6 @@
             <div class="section-header">
                 <div class="section-title">Mode CMJN</div>
             </div>
-            <!-- Bandeau de couleur -->
             <div id="strip-cmjn" class="color-strip" style="background-color: #C86432;"></div>
 
             <div class="control-row">
@@ -358,7 +348,6 @@
             <div class="section-header">
                 <div class="section-title">Mode TSL</div>
             </div>
-            <!-- Bandeau de couleur -->
             <div id="strip-hsl" class="color-strip" style="background-color: #C86432;"></div>
 
             <div class="control-row">
@@ -427,12 +416,12 @@
     let isUpdating = false;
 
     const els = {};
+    // Initialisation des références DOM
     ['r','g','b','c','m','y','k','h','s','l'].forEach(id => {
         els[id] = document.getElementById(id);
         els['val'+id.toUpperCase()] = document.getElementById('val-'+id);
     });
     
-    // Éléments des bandeaux
     const stripRgb = document.getElementById('strip-rgb');
     const stripCmjn = document.getElementById('strip-cmjn');
     const stripHsl = document.getElementById('strip-hsl');
@@ -444,18 +433,54 @@
     const textHsl = document.getElementById('text-hsl');
 
     function init() {
+        // Configuration RVB
         ['r','g','b'].forEach(k => {
-            els[k].addEventListener('input', (e) => { state[k] = parseInt(e.target.value); updateFromRGB(); });
-            els[k].style.color = els[k].getAttribute('data-color');
+            const slider = els[k];
+            const label = els['val'+k.toUpperCase()];
+            
+            // Mise à jour immédiate du label lors du glissement
+            slider.addEventListener('input', (e) => { 
+                const val = parseInt(e.target.value);
+                state[k] = val;
+                label.textContent = val; // Mise à jour directe du chiffre
+                updateFromRGB(); 
+            });
+            
+            slider.style.color = slider.getAttribute('data-color');
         });
+
+        // Configuration CMJN
         ['c','m','y','k'].forEach(k => {
-            els[k].addEventListener('input', (e) => { state[k] = parseInt(e.target.value); updateFromCMJN(); });
-            els[k].style.color = els[k].getAttribute('data-color');
+            const slider = els[k];
+            const label = els['val'+k.toUpperCase()];
+
+            slider.addEventListener('input', (e) => { 
+                const val = parseInt(e.target.value);
+                state[k] = val;
+                label.textContent = val + '%';
+                updateFromCMJN(); 
+            });
+            
+            slider.style.color = slider.getAttribute('data-color');
         });
+
+        // Configuration TSL
         ['h','s','l'].forEach(k => {
-            els[k].addEventListener('input', (e) => { state[k] = parseInt(e.target.value); updateFromHSL(); });
-            if(k==='h') els[k].style.color = els[k].getAttribute('data-color');
-            else els[k].style.color = '#e74c3c';
+            const slider = els[k];
+            const label = els['val'+k.toUpperCase()];
+
+            slider.addEventListener('input', (e) => { 
+                const val = parseInt(e.target.value);
+                state[k] = val;
+                // Formatage spécifique pour TSL
+                let suffix = (k==='h') ? '°' : '%';
+                label.textContent = val + suffix;
+                
+                updateFromHSL(); 
+            });
+            
+            if(k==='h') slider.style.color = slider.getAttribute('data-color');
+            else slider.style.color = '#e74c3c';
         });
 
         hexInput.addEventListener('change', handleHex);
@@ -471,6 +496,12 @@
         state[key] = val;
         els[key].value = val;
         
+        // Mise à jour manuelle du label après clic bouton
+        let suffix = '';
+        if (['c','m','y','k','s','l'].includes(key)) suffix = '%';
+        if (key === 'h') suffix = '°';
+        els['val'+key.toUpperCase()].textContent = val + suffix;
+
         if (['r','g','b'].includes(key)) updateFromRGB();
         else if (['c','m','y','k'].includes(key)) updateFromCMJN();
         else updateFromHSL();
@@ -527,9 +558,12 @@
     function updateSliders(keys) {
         keys.forEach(k => {
             els[k].value = state[k];
-            if(els['val'+k.toUpperCase()]) {
-                let suffix = (k==='h') ? '°' : (k==='s'||k==='l'||k==='c'||k==='m'||k==='y'||k==='k') ? '%' : '';
-                els['val'+k.toUpperCase()].textContent = state[k] + suffix;
+            const label = els['val'+k.toUpperCase()];
+            if(label) {
+                let suffix = '';
+                if (k==='h') suffix = '°';
+                else if (['s','l','c','m','y','k'].includes(k)) suffix = '%';
+                label.textContent = state[k] + suffix;
             }
         });
     }
@@ -537,7 +571,6 @@
     function updateDisplay() {
         const hex = rgbToHex(state.r, state.g, state.b);
         
-        // Mise à jour de TOUS les éléments visuels
         previewBox.style.backgroundColor = hex;
         stripRgb.style.backgroundColor = hex;
         stripCmjn.style.backgroundColor = hex;
@@ -558,6 +591,10 @@
             state.g = parseInt(val.substr(3,2), 16);
             state.b = parseInt(val.substr(5,2), 16);
             els.r.value = state.r; els.g.value = state.g; els.b.value = state.b;
+            // Mise à jour directe des labels RVB
+            els['valR'].textContent = state.r;
+            els['valG'].textContent = state.g;
+            els['valB'].textContent = state.b;
             updateFromRGB();
         }
     }
