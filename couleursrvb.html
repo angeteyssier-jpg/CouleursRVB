@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sélecteur de Couleur(RVB & CMJN)</title>
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --accent-color: #2c3e50;
+            --trough-color: #bdc3c7;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            user-select: none; /* Empêche la sélection de texte accidentelle */
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            background: var(--bg-color);
+        }
+
+        /* Titres et En-tête */
+        header {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Sections (Cartes) */
+        .section {
+            flex: 1;
+            min-width: 300px;
+            background: var(--bg-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        /* Contrôles (Lignes) */
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .label-text {
+            width: 80px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .value-display {
+            width: 40px;
+            text-align: right;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        /* Sliders stylisés */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin: 0 10px;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Le curseur (Thumb) */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid currentColor; /* Prend la couleur définie dans le style inline */
+            cursor: pointer;
+            margin-top: -8px; /* Centrage */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Le chemin (Track) */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: var(--trough-color);
+            border-radius: 3px;
+            border: 1px solid #999;
+        }
+
+        /* Boutons de précision */
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding-left: 90px; /* Alignement avec le slider */
+        }
+
+        .btn-step {
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 40px;
+            transition: transform 0.1s;
+        }
+
+        .btn-step:active {
+            transform: scale(0.95);
+        }
+
+        .btn-minus { background-color: #c0392b; }
+        .btn-minus-small { background-color: #e74c3c; }
+        .btn-plus-small { background-color: #2ecc71; }
+        .btn-plus { background-color: #27ae60; }
+
+        /* Zone d'aperçu */
+        .preview-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .color-box {
+            width: 200px;
+            height: 120px;
+            margin: 10px auto;
+            border: 2px solid var(--accent-color);
+            border-radius: 4px;
+            background-color: #ffffff;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .hex-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            width: 100px;
+            text-transform: uppercase;
+        }
+
+        /* Bouton Pipette */
+        .pipette-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-pipette {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-pipette:hover {
+            background-color: #34495e;
+        }
+
+        .btn-pipette:active {
+            transform: translateY(1px);
+        }
+
+        .icon {
+            font-size: 1.2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .container {
+                flex-direction: column;
+            }
+            .btn-group {
+                padding-left: 0;
+                justify-content: center;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div style="width: 100%; max-width: 900px;">
+        <header>
+            <h1>🎨 Sélecteur de Couleur Professionnel</h1>
+        </header>
+
+        <div class="container">
+            <!-- Section RVB -->
+            <div class="section" id="rgb-section">
+                <div class="section-title">Mode RVB (0-255)</div>
+                
+                <!-- Rouge -->
+                <div class="control-wrapper">
+                    <div class="control-row">
+                        <span class="label-text">Rouge:</span>
+                        <input type="range" id="slider-r" min="0" max="255" value="200" data-color="#e74c3c">
+                        <span class="value-display" id="val-r" style="color: #e74c3c">200</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-step btn-minus" onclick="adjustColor('r', -10)">-10</button>
+                        <button class="btn-step btn-minus-small" onclick="adjustColor('r', -1)">-1</button>
+                        <button class="btn-step btn-plus-small" onclick="adjustColor('r', 1)">+1</button>
+                        <button class="btn-step btn-plus" onclick="adjustColor('r', 10)">+10</button>
+                    </div>
+                </div>
+
+                <!-- Vert -->
+                <div class="control-wrapper">
+                    <div class="control-row">
+                        <span class="label-text">Vert:</span>
+                        <input type="range" id="slider-v" min="0" max="255" value="100" data-color="#27ae60">
+                        <span class="value-display" id="val-v" style="color: #27ae60">100</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-step btn-minus" onclick="adjustColor('v', -10)">-10</button>
+                        <button class="btn-step btn-minus-small" onclick="adjustColor('v', -1)">-1</button>
+                        <button class="btn-step btn-plus-small" onclick="adjustColor('v', 1)">+1</button>
+                        <button class="btn-step btn-plus" onclick="adjustColor('v', 10)">+10</button>
+                    </div>
+                </div>
+
+                <!-- Bleu -->
+                <div class="control-wrapper">
+                    <div class="control-row">
+                        <span class="label-text">Bleu:</span>
+                        <input type="range" id="slider-b" min="0" max="255" value="50" data-color="#3498db">
+                        <span class="value-display" id="val-b" style="color: #3498db">50</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-step btn-minus" onclick="adjustColor('b', -10)">-10</button>
+                        <button class="btn-step btn-minus-small" onclick="adjustColor('b', -1)">-1</button>
+                        <button class="btn-step btn-plus-small" onclick="adjustColor('b', 1)">+1</button>
+                        <button class="btn-step btn-plus" onclick="adjustColor('b', 10)">+10</button>
+                    </div>
+                </div>
+
+                <div class="preview-container">
+                    <div style="font-weight: bold; color: var(--accent-color);">Aperçu de la couleur:</div>
+                    <div id="rgb-preview" class="color-box"></div>
+                    <div id="rgb-text" style="font-family: var(--font-mono); font-weight: bold; color: var(--accent-color); margin: 10px 0;"></div>
+                    
+                    <div class="hex-input-group">
+                        <span style="font-weight: bold; color: var(--accent-color);">HTML:</span>
+                        <input type="text" id="hex-input" value="#C86432" maxlength="7">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section CMJN -->
+            <div class="section" id="cmjn-section">
+                <div class="section-title">Mode CMJN (0-100%)</div>
+
+                <!-- Cyan -->
+                <div class="control-row">
+                    <span class="label-text">Cyan:</span>
+                    <input type="range" id="slider-c" min="0" max="100" value="0" data-color="#06d6d0">
+                    <span class="value-display" id="val-c" style="color: #06d6d0">0</span>
+                </div>
+
+                <!-- Magenta -->
+                <div class="control-row">
+                    <span class="label-text">Magenta:</span>
+                    <input type="range" id="slider-m" min="0" max="100" value="0" data-color="#ff006e">
+                    <span class="value-display" id="val-m" style="color: #ff006e">0</span>
+                </div>
+
+                <!-- Jaune -->
+                <div class="control-row">
+                    <span class="label-text">Jaune:</span>
+                    <input type="range" id="slider-j" min="0" max="100" value="0" data-color="#ffbe0b">
+                    <span class="value-display" id="val-j" style="color: #ffbe0b">0</span>
+                </div>
+
+                <!-- Noir -->
+                <div class="control-row">
+                    <span class="label-text">Noir:</span>
+                    <input type="range" id="slider-n" min="0" max="100" value="0" data-color="#000000">
+                    <span class="value-display" id="val-n" style="color: #000000">0</span>
+                </div>
+
+                <div class="preview-container">
+                    <div style="font-weight: bold; color: var(--accent-color);">Aperçu de la couleur:</div>
+                    <div id="cmjn-preview" class="color-box"></div>
+                    <div id="cmjn-text" style="font-family: var(--font-mono); font-weight: bold; color: var(--accent-color); margin: 10px 0;"></div>
+                </div>
+
+                <!-- Bouton Pipette -->
+                <div class="pipette-container">
+                    <button class="btn-pipette" onclick="activateEyedropper()">
+                        <span class="icon">🎨</span> Pipette (Capturer écran)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // État initial
+        let state = {
+            r: 200, v: 100, b: 50,
+            c: 0, m: 0, j: 0, n: 0
+        };
+
+        // Éléments du DOM
+        const els = {
+            r: document.getElementById('slider-r'),
+            v: document.getElementById('slider-v'),
+            b: document.getElementById('slider-b'),
+            c: document.getElementById('slider-c'),
+            m: document.getElementById('slider-m'),
+            j: document.getElementById('slider-j'),
+            n: document.getElementById('slider-n'),
+            valR: document.getElementById('val-r'),
+            valV: document.getElementById('val-v'),
+            valB: document.getElementById('val-b'),
+            valC: document.getElementById('val-c'),
+            valM: document.getElementById('val-m'),
+            valJ: document.getElementById('val-j'),
+            valN: document.getElementById('val-n'),
+            rgbPreview: document.getElementById('rgb-preview'),
+            cmjnPreview: document.getElementById('cmjn-preview'),
+            rgbText: document.getElementById('rgb-text'),
+            cmjnText: document.getElementById('cmjn-text'),
+            hexInput: document.getElementById('hex-input')
+        };
+
+        // Initialisation des écouteurs d'événements
+        function init() {
+            // RVB Sliders
+            ['r', 'v', 'b'].forEach(key => {
+                els[key].addEventListener('input', (e) => {
+                    state[key] = parseInt(e.target.value);
+                    updateFromRGB();
+                });
+                // Style dynamique du curseur
+                els[key].style.color = els[key].getAttribute('data-color');
+            });
+
+            // CMJN Sliders
+            ['c', 'm', 'j', 'n'].forEach(key => {
+                els[key].addEventListener('input', (e) => {
+                    state[key] = parseInt(e.target.value);
+                    updateFromCMJN();
+                });
+                els[key].style.color = els[key].getAttribute('data-color');
+            });
+
+            // Input Hex
+            els.hexInput.addEventListener('change', handleHexInput);
+            els.hexInput.addEventListener('blur', handleHexInput);
+            els.hexInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleHexInput();
+            });
+
+            updateDisplay();
+        }
+
+        // Fonction pour les boutons +/-
+        function adjustColor(channel, step) {
+            let current = state[channel];
+            let max = (['r','v','b'].includes(channel)) ? 255 : 100;
+            let newVal = current + step;
+            
+            // Bornes
+            if (newVal < 0) newVal = 0;
+            if (newVal > max) newVal = max;
+
+            state[channel] = newVal;
+            
+            // Mise à jour du slider correspondant
+            els[channel].value = newVal;
+
+            if (['r','v','b'].includes(channel)) {
+                updateFromRGB();
+            } else {
+                updateFromCMJN();
+            }
+        }
+
+        // Mise à jour depuis RVB
+        function updateFromRGB() {
+            const { r, v, b } = state;
+            
+            // Mise à jour labels
+            els.valR.textContent = r;
+            els.valV.textContent = v;
+            els.valB.textContent = b;
+
+            // Conversion RVB -> CMJN
+            const cmjn = rgbToCmjn(r, v, b);
+            state.c = cmjn.c; state.m = cmjn.m; state.j = cmjn.j; state.n = cmjn.n;
+
+            // Mise à jour sliders CMJN
+            els.c.value = state.c;
+            els.m.value = state.m;
+            els.j.value = state.j;
+            els.n.value = state.n;
+            els.valC.textContent = state.c;
+            els.valM.textContent = state.m;
+            els.valJ.textContent = state.j;
+            els.valN.textContent = state.n;
+
+            updateDisplay();
+        }
+
+        // Mise à jour depuis CMJN
+        function updateFromCMJN() {
+            const { c, m, j, n } = state;
+
+            // Mise à jour labels
+            els.valC.textContent = c;
+            els.valM.textContent = m;
+            els.valJ.textContent = j;
+            els.valN.textContent = n;
+
+            // Conversion CMJN -> RVB
+            const rgb = cmjnToRgb(c, m, j, n);
+            state.r = rgb.r; state.v = rgb.v; state.b = rgb.b;
+
+            // Mise à jour sliders RVB
+            els.r.value = state.r;
+            els.v.value = state.v;
+            els.b.value = state.b;
+            els.valR.textContent = state.r;
+            els.valV.textContent = state.v;
+            els.valB.textContent = state.b;
+
+            updateDisplay();
+        }
+
+        // Affichage global (Hex, Preview)
+        function updateDisplay() {
+            const { r, v, b } = state;
+            const hex = rgbToHex(r, v, b);
+            
+            // Textes
+            els.rgbText.textContent = `R: ${r}  V: ${v}  B: ${b}`;
+            els.cmjnText.textContent = `C: ${state.c}  M: ${state.m}  J: ${state.j}  N: ${state.n}`;
+            
+            // Input Hex (éviter boucle si l'utilisateur tape)
+            if (document.activeElement !== els.hexInput) {
+                els.hexInput.value = hex;
+            }
+
+            // Couleurs d'aperçu
+            const colorString = hex;
+            els.rgbPreview.style.backgroundColor = colorString;
+            els.cmjnPreview.style.backgroundColor = colorString;
+        }
+
+        // Gestion entrée Hex
+        function handleHexInput() {
+            let val = els.hexInput.value.trim();
+            if (!val.startsWith('#')) val = '#' + val;
+            
+            if (val.length === 7 && /^#[0-9A-Fa-f]{6}$/.test(val)) {
+                const r = parseInt(val.substr(1, 2), 16);
+                const v = parseInt(val.substr(3, 2), 16);
+                const b = parseInt(val.substr(5, 2), 16);
+                
+                state.r = r; state.v = v; state.b = b;
+                
+                els.r.value = r; els.v.value = v; els.b.value = b;
+                updateFromRGB();
+            } else {
+                // Reset si invalide
+                els.hexInput.value = "#000000";
+            }
+        }
+
+        // --- Algorithmes de conversion ---
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
+
+        function rgbToCmjn(r, g, b) {
+            if (r === 0 && g === 0 && b === 0) return { c: 0, m: 0, j: 0, n: 100 };
+
+            const rn = r / 255;
+            const gn = g / 255;
+            const bn = b / 255;
+
+            const k = 1 - Math.max(rn, gn, bn);
+            
+            if (k === 1) return { c: 0, m: 0, j: 0, n: 100 };
+
+            const c = (1 - rn - k) / (1 - k);
+            const m = (1 - gn - k) / (1 - k);
+            const j = (1 - bn - k) / (1 - k);
+
+            return {
+                c: Math.round(c * 100),
+                m: Math.round(m * 100),
+                j: Math.round(j * 100),
+                n: Math.round(k * 100)
+            };
+        }
+
+        function cmjnToRgb(c, m, y, k) {
+            const cn = c / 100;
+            const mn = m / 100;
+            const yn = y / 100;
+            const kn = k / 100;
+
+            const r = 255 * (1 - cn) * (1 - kn);
+            const g = 255 * (1 - mn) * (1 - kn);
+            const b = 255 * (1 - yn) * (1 - kn);
+
+            return {
+                r: Math.round(r),
+                v: Math.round(g), // Attention: variable 'v' dans notre code = Green
+                b: Math.round(b)
+            };
+        }
+
+        // --- Fonction Pipette (EyeDropper API) ---
+        async function activateEyedropper() {
+            if ('EyeDropper' in window) {
+                try {
+                    const eyeDropper = new EyeDropper();
+                    const result = await eyeDropper.open();
+                    
+                    // Result sRGBHex est de la forme "#rrggbb"
+                    const hex = result.sRGBHex;
+                    
+                    // Mise à jour manuelle
+                    els.hexInput.value = hex;
+                    handleHexInput();
+                    
+                } catch (e) {
+                    // L'utilisateur a annulé
+                    console.log("Sélection annulée");
+                }
+            } else {
+                alert("Votre navigateur ne supporte pas la pipette système (EyeDropper API). \nEssayez avec Chrome, Edge ou Opera.");
+                // Fallback: ouvrir un input color caché ? Non, cela ne capture pas hors du navigateur.
+            }
+        }
+
+        // Démarrage
+        init();
+
+    </script>
+</body>
+</html>
